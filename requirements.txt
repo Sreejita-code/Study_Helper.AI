@@ -1,0 +1,10 @@
+requests
+beautifulsoup4
+schedule
+plyer
+pandas
+matplotlib
+python-telegram-bot
+streamlit
+plyer
+schedule
