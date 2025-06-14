@@ -1,5 +1,30 @@
 [
   {
+    "title": "Single Number",
+    "titleSlug": "single-number",
+    "timestamp": "1749907921"
+  },
+  {
+    "title": "Max Consecutive Ones",
+    "titleSlug": "max-consecutive-ones",
+    "timestamp": "1749907746"
+  },
+  {
+    "title": "Missing Number",
+    "titleSlug": "missing-number",
+    "timestamp": "1749904206"
+  },
+  {
+    "title": "Move Zeroes",
+    "titleSlug": "move-zeroes",
+    "timestamp": "1749903002"
+  },
+  {
+    "title": "Rotate Array",
+    "titleSlug": "rotate-array",
+    "timestamp": "1749887872"
+  },
+  {
     "title": "Remove Duplicates from Sorted Array",
     "titleSlug": "remove-duplicates-from-sorted-array",
     "timestamp": "1749746092"

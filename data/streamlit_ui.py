@@ -14,8 +14,7 @@ st.set_page_config(page_title="📚 Study Agent", layout="centered")
 st.sidebar.title("🧠 Study Agent")
 page = st.sidebar.radio("Choose a section", [
     "📋 Task Manager",
-    "📊 LeetCode Analyzer",
-    "🧪 Weekly Test Generator"
+    "📊 Analyze & Generate"
 ])
 
 # -------------- 📋 Task Manager --------------
@@ -51,56 +50,52 @@ def show_task_manager_ui():
                     task_manager.delete_task(task["id"])
                     st.experimental_rerun()
 
-# -------------- 📊 LeetCode Analyzer --------------
-def show_leetcode_analyzer_ui():
-    st.title("📊 LeetCode Practice Analyzer")
+# -------------- 📊 Analyzer + 🧪 Generator --------------
+def show_analyze_and_test_ui():
+    st.title("📊 Analyze Submissions & 🧪 Generate Test")
 
     username = st.text_input("Enter your LeetCode username", placeholder="e.g. rudrasish2003")
 
-    if st.button("🔍 Analyze Submissions"):
-        if username.strip():
+    if username.strip():
+        col1, col2 = st.columns(2)
+
+        with col1:
+            analyze_clicked = st.button("🔍 Analyze Submissions")
+        with col2:
+            test_clicked = st.button("🚀 Generate Weekly Test")
+
+        if analyze_clicked:
             with st.spinner("Fetching your recent LeetCode submissions..."):
                 results = leetcode_agent.fetch_recent_ac_problems(username, limit=15)
 
                 if results:
                     st.success(f"✅ Found {len(results)} recent accepted submissions.")
+                    st.markdown("### 🔍 Recent Solved Problems:")
                     for r in results:
-                        st.markdown(
-                            f"- 🧩 [{r['title']}](https://leetcode.com/problems/{r['titleSlug']}/)"
-                        )
+                        st.markdown(f"- 🧩 [{r['title']}](https://leetcode.com/problems/{r['titleSlug']}/)")
                 else:
-                    st.warning("⚠️ No recent accepted problems found. Try solving one and retry.")
-        else:
-            st.warning("⚠️ Please enter a valid username.")
+                    st.warning("⚠️ No recent accepted problems found.")
 
-
-# -------------- 🧪 Weekly Test Generator --------------
-def show_test_generator_ui():
-    st.title("🧪 Weekly Test Generator")
-
-    username = st.text_input("LeetCode username", placeholder="e.g. rudrasish2003", key="test_username")
-    days = st.slider("Look at past N days of submissions", 1, 30, 10)
-    topics = st.text_input("Add topics (comma-separated)", placeholder="e.g. DP, Tree, Binary Search")
-    difficulty = st.selectbox("Select difficulty", ["Any", "Easy", "Medium", "Hard"])
-
-    if st.button("🚀 Generate Test"):
-        if username.strip():
+        if test_clicked:
             with st.spinner("Generating personalized test..."):
-                test = leetcode_agent.generate_custom_test(username, days, topics, difficulty)
+                test = leetcode_agent.generate_custom_test(username=username)
                 if test:
                     st.success(f"✅ Test generated with {len(test)} questions!")
                     st.markdown("### 📝 Your Practice Test:")
                     for q in test:
-                        st.markdown(f"- {q['title']} – {q['difficulty']}")
+                        st.markdown(f"""
+                        #### 🧩 [{q['title']}]({q['problemLink']})
+                        - **Difficulty**: `{q['difficulty']}`
+                        - **Topics**: `{', '.join(q['tags'])}`
+                        - 🔗 [Community Solutions]({q['solutionLink']})
+                        """)
                 else:
-                    st.warning("⚠️ No test could be generated with these filters.")
-        else:
-            st.warning("⚠️ Please enter your LeetCode username.")
+                    st.warning("⚠️ No test could be generated at this time.")
+    else:
+        st.info("ℹ️ Please enter your LeetCode username to begin.")
 
 # -------------- Router --------------
 if page == "📋 Task Manager":
     show_task_manager_ui()
-elif page == "📊 LeetCode Analyzer":
-    show_leetcode_analyzer_ui()
-elif page == "🧪 Weekly Test Generator":
-    show_test_generator_ui()
+elif page == "📊 Analyze & Generate":
+    show_analyze_and_test_ui()
