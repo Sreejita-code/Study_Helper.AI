@@ -1,0 +1,198 @@
+{
+  "name": "LeetCode Analyzer & Study Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "study-assistant",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "webhookId": "study-assistant-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "leetcode-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "leetcode_analysis",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "leetcode-switch",
+      "name": "LeetCode Analysis Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [400, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "aptitude-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "aptitude_test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "aptitude-switch",
+      "name": "Aptitude Test Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [400, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "youtube-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "youtube_summary",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "youtube-switch",
+      "name": "YouTube Summary Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [400, 600]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://leetcode.com/graphql",
+        "authentication": "none",
+        "requestFormat": "json",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"query\": \"query getUserProfile($username: String!) { matchedUser(username: $username) { username profile { realName website countryName company school skillTags starRating aboutMe userAvatar reputation ranking } } }\",\n  \"variables\": {\n    \"username\": \"{{ $json.username }}\"\n  }\n}",
+        "headerParametersJson": "={\n  \"Content-Type\": \"application/json\",\n  \"Referer\": \"https://leetcode.com\"\n}"
+      },
+      "id": "leetcode-profile",
+      "name": "Get LeetCode Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [600, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://leetcode.com/graphql",
+        "authentication": "none",
+        "requestFormat": "json",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"query\": \"query getRecentSubmissions($username: String!, $limit: Int) { matchedUser(username: $username) { username submitStats { acSubmissionNum { difficulty count } } } recentSubmissions(username: $username, limit: $limit) { title titleSlug timestamp status statusDisplay lang difficulty topicTags { name slug } } }\",\n  \"variables\": {\n    \"username\": \"{{ $json.username }}\",\n    \"limit\": 20\n  }\n}",
+        "headerParametersJson": "={\n  \"Content-Type\":\"application/json\",\n  \"Referer\": \"https://leetcode.com\"\n}"
+      },
+      "id": "leetcode-submissions",
+      "name": "Get Recent Submissions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [600, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": ""
+      },
+      "id": "analyze-submissions",
+      "name": "Analyze Submissions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "response-node",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1400, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          { "node": "LeetCode Analysis Switch", "type": "main", "index": 0 },
+          { "node": "Aptitude Test Switch", "type": "main", "index": 0 },
+          { "node": "YouTube Summary Switch", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "LeetCode Analysis Switch": {
+      "main": [
+        [
+          { "node": "Get LeetCode Profile", "type": "main", "index": 0 },
+          { "node": "Get Recent Submissions", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get LeetCode Profile": {
+      "main": [
+        [
+          { "node": "Analyze Submissions", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Recent Submissions": {
+      "main": [
+        [
+          { "node": "Analyze Submissions", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Analyze Submissions": {
+      "main": [
+        [
+          { "node": "Response", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "versionId": "1"
+}
